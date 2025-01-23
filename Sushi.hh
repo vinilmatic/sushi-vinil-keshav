@@ -1,9 +1,10 @@
 #pragma once
-#include <string> 
+#include <string>
+#include <deque> 
 
 class Sushi {
 private:
-  int history; // `int` is a placehoder; replace it with a type of your choice
+  std::deque<std::string> history; // `int` is a placehoder; replace it with a type of your choice
   static const size_t HISTORY_LENGTH;
   static const size_t MAX_INPUT;
 
