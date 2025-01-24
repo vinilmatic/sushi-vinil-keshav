@@ -1,9 +1,37 @@
 #include <iostream>
 #include <iomanip>
+#include <cctype>
+#include <cstdio>
 #include "Sushi.hh"
 
 std::string Sushi::read_line(std::istream &in)
 {
+  std::string buffer;
+  char ch;
+  int count = 0;
+  bool exceeded = false;
+
+  //read characters from an input stream
+  while (in.get(ch)) {
+    if (ch == '/n') {
+      break;
+    }
+    if (count < MAX_INPUT) {
+      buffer += ch;
+    } else {
+      exceeded = true;
+    }
+    ++count;
+
+    if (in.bad()) {
+      std::perror("Input error");
+      return nullptr;
+    }
+
+    if (exceeded) {
+      std::cerr << "Line too long, truncated." << std::endl;
+    }
+  }
   return nullptr; // A placeholder
 }
 
