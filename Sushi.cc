@@ -2,10 +2,14 @@
 #include <iomanip>
 #include <cctype>
 #include <cstdio>
+#include <algorithm>
+#include <fstream>
 #include "Sushi.hh"
 
 std::string Sushi::read_line(std::istream &in)
 {
+  //std::string response = "Read";
+  //return response;
   std::string buffer;
   char ch;
   int count = 0;
@@ -13,7 +17,7 @@ std::string Sushi::read_line(std::istream &in)
 
   //read characters from an input stream
   while (in.get(ch)) {
-    if (ch == '/n') {
+    if (ch == '\n') {
       break;
     }
     if (count < MAX_INPUT) {
@@ -22,22 +26,57 @@ std::string Sushi::read_line(std::istream &in)
       exceeded = true;
     }
     ++count;
-
-    if (in.bad()) {
-      std::perror("Input error");
-      return nullptr;
-    }
-
-    if (exceeded) {
-      std::cerr << "Line too long, truncated." << std::endl;
-    }
   }
-  return nullptr; // A placeholder
+
+  if (in.bad()) {
+    std::perror("Input error");
+    return "";
+  }
+
+  if (exceeded) {
+    std::cerr << "Line too long, truncated." << std::endl;
+  }
+
+  if (buffer.empty() || std::all_of(buffer.begin(), buffer.end(), [](unsigned char c) { return std::isspace(c); })) {
+    return "";
+  }
+  return buffer; // A placeholder
 }
 
 bool Sushi::read_config(const char *fname, bool ok_if_missing)
 {
-  return false; // A placeholder
+  std::ifstream file(fname);
+
+  if (!file.is_open()) {
+    if (ok_if_missing) {
+      return true;
+    } else {
+      std::perror("Can't open file");
+      return false;
+    }
+  }
+
+  while (file.good()) {
+    std::string line = read_line(file);
+    if (line.empty()) {
+      continue;
+    }
+
+    store_to_history(line);
+  }
+
+  if (file.bad()) {
+    std::perror("Can't open file");
+    return false;
+  }
+
+  file.close();
+  if (file.fail()) {
+    std::perror("Can't close file");
+    return false;
+  }
+
+  return true; // A placeholder
 }
 
 void Sushi::store_to_history(std::string line)
@@ -58,13 +97,14 @@ void Sushi::store_to_history(std::string line)
 
 void Sushi::show_history()
 {
-  for (size_t i=0; i < history.size(); ++i) {
+  for (int i=history.size()-1; i < history.size(); --i) {
     std::cout << std::setw(5)
-              << std::setfill('0')
-              << i + 1
+              << std::setfill(' ')
+              << history.size() - i
               << "  "
               << history[i]
               << std::endl;
   }
 }
+
 
