@@ -45,8 +45,10 @@ std::string Sushi::read_line(std::istream &in)
 
 bool Sushi::read_config(const char *fname, bool ok_if_missing)
 {
+  //Open file for reading
   std::ifstream file(fname);
 
+  //Handles two situations if the file is unable to be opened
   if (!file.is_open()) {
     if (ok_if_missing) {
       return true;
@@ -56,21 +58,31 @@ bool Sushi::read_config(const char *fname, bool ok_if_missing)
     }
   }
 
+  //Reads the lines in the config file
   while (file.good()) {
     std::string line = read_line(file);
+
+    //Skips empty lines
     if (line.empty()) {
       continue;
     }
 
+    //Stores the lines in history
     store_to_history(line);
   }
 
+  //Prints error message if file could not be opened
   if (file.bad()) {
     std::perror("Can't open file");
     return false;
   }
 
+  //Clear all previous flags set
+  file.clear();
+  //Close file
   file.close();
+
+  //Print error if file is unable to be closed
   if (file.fail()) {
     std::perror("Can't close file");
     return false;
@@ -97,7 +109,8 @@ void Sushi::store_to_history(std::string line)
 
 void Sushi::show_history()
 {
-  for (int i=history.size()-1; i < history.size(); --i) {
+  //Iterate through the deque backwards because the first line is at the back of the deque
+  for (int i=history.size()-1; i < history.size(); i--) {
     std::cout << std::setw(5)
               << std::setfill(' ')
               << history.size() - i
