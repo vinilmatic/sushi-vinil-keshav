@@ -1,3 +1,8 @@
+/*Name: Vinil Keshav
+  Assignment: Reading and Storing COmmands
+  Description: This file contains the definitions for all the methods in the Sushi class.
+*/
+
 #pragma once
 #include <string>
 #include <deque> 

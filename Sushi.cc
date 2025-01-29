@@ -1,3 +1,9 @@
+/*Name: Vinil Keshav
+  Assignment: Reading and Storing Commands
+  Description: This is the implementation file that contains the implementation of the Sushi class 
+  methods found in the header file.
+*/
+
 #include <iostream>
 #include <iomanip>
 #include <cctype>
@@ -12,7 +18,7 @@ std::string Sushi::read_line(std::istream &in)
   //return response;
   std::string buffer;
   char ch;
-  int count = 0;
+  size_t count = 0;
   bool exceeded = false;
 
   //read characters from an input stream
@@ -109,13 +115,14 @@ void Sushi::store_to_history(std::string line)
 
 void Sushi::show_history()
 {
+  int deque_size = history.size();
   //Iterate through the deque backwards because the first line is at the back of the deque
-  for (int i=history.size()-1; i < history.size(); i--) {
+  for (int i=history.size()-1; i >= 0; i--) {
     std::cout << std::setw(5)
               << std::setfill(' ')
               << history.size() - i
               << "  "
-              << history[i]
+              << history[i] 
               << std::endl;
   }
 }
