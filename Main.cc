@@ -12,6 +12,7 @@
 #include <algorithm>
 #include "Sushi.hh"
 
+Sushi my_shell; // New global var
 // Initialize the static constants
 const size_t Sushi::MAX_INPUT = 256;
 const size_t Sushi::HISTORY_LENGTH = 10;
@@ -22,11 +23,13 @@ int main(int argc, char *argv[])
   UNUSED(argc);
   UNUSED(argv);
 
+  // DZ: Moved to globals (not a mistake)
   //Create Sushi object
-  Sushi sushi;
+  // Sushi sushi;
 
   //Check that user is in $HOME directory
   const char *directory = std::getenv("HOME");
+  // DZ: No need to exit because "ok if missing"
   if (!directory) {
     std::cerr << "Error: Not in HOME environment variable";
     return EXIT_FAILURE;
@@ -36,26 +39,33 @@ int main(int argc, char *argv[])
   std::string config_path = std::string(directory) + "/sushi.conf";
   //Convert string to char *
   const char *configFile = config_path.c_str();
-  std::cout << "Testing read_config with file: " << config_path << "\n";
+
+  // DZ: Unneeded message
+  // std::cout << "Testing read_config with file: " << config_path << "\n";
 
   //Check if system was able to read config file
-  if (sushi.read_config(configFile, false)) {
-    std::cout << "Config file successfully read.\n";
+  // DZ: Must be `true`, not `false`
+  if (my_shell.read_config(configFile, false)) {
+    // DZ: Unneeded message
+    // std::cout << "Config file successfully read.\n";
   } else {
-    std::cerr << "Failed to read config file.\n";
+    // DZ: Duplicate error message
+    // std::cerr << "Failed to read config file.\n";
     return EXIT_FAILURE;
   }
   
   // A placeholder
-  std::cout << Sushi::DEFAULT_PROMPT << "Enter a line: ";
+  // DZ: Unneeded message after the prompt
+  std::cout << Sushi::DEFAULT_PROMPT /*<< "Enter a line: "*/;
 
   //Read line entered by user
-  std::string line = sushi.read_line(std::cin);
+  std::string line = my_shell.read_line(std::cin);
   //Store line in history
-  sushi.store_to_history(line);
+  my_shell.store_to_history(line);
   //Print out history of read lines
-  std::cout << "Command history: " << std::endl;
-  sushi.show_history();
+  // DZ: Unneeded message after the prompt
+  // std::cout << "Command history: " << std::endl;
+  my_shell.show_history();
   
   return EXIT_SUCCESS;
 }

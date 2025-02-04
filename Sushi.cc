@@ -21,6 +21,7 @@ std::string Sushi::read_line(std::istream &in)
   size_t count = 0;
   bool exceeded = false;
 
+  // DZ: Very inefficient in C++; use std::getline
   //read characters from an input stream
   while (in.get(ch)) {
     if (ch == '\n') {
@@ -43,6 +44,7 @@ std::string Sushi::read_line(std::istream &in)
     std::cerr << "Line too long, truncated." << std::endl;
   }
 
+  // DZ: The first condition is redundant
   if (buffer.empty() || std::all_of(buffer.begin(), buffer.end(), [](unsigned char c) { return std::isspace(c); })) {
     return "";
   }
@@ -59,7 +61,9 @@ bool Sushi::read_config(const char *fname, bool ok_if_missing)
     if (ok_if_missing) {
       return true;
     } else {
-      std::perror("Can't open file");
+      // DZ: Wrong use of perror
+      // std::perror("Can't open file");
+      std::perror(fname);
       return false;
     }
   }
@@ -68,26 +72,31 @@ bool Sushi::read_config(const char *fname, bool ok_if_missing)
   while (file.good()) {
     std::string line = read_line(file);
 
+    // DZ: This check will be done in `store_to_history`
     //Skips empty lines
     if (line.empty()) {
       continue;
     }
 
+    // DZ: This operation does not belong in this function
     //Stores the lines in history
     store_to_history(line);
   }
 
   //Prints error message if file could not be opened
   if (file.bad()) {
+    // DZ: See above
     std::perror("Can't open file");
     return false;
   }
 
+  // DZ: C++ closes all local ifstreams automatically
   //Clear all previous flags set
   file.clear();
   //Close file
   file.close();
 
+  // DZ: You cannot check the status of a closed file
   //Print error if file is unable to be closed
   if (file.fail()) {
     std::perror("Can't close file");
@@ -115,6 +124,7 @@ void Sushi::store_to_history(std::string line)
 
 void Sushi::show_history()
 {
+  // DZ: Unused
   int deque_size = history.size();
   //Iterate through the deque backwards because the first line is at the back of the deque
   for (int i=history.size()-1; i >= 0; i--) {
@@ -128,3 +138,12 @@ void Sushi::show_history()
 }
 
 
+void Sushi::set_exit_flag()
+{
+  // To be implemented
+}
+
+bool Sushi::get_exit_flag() const
+{
+  return false; // To be fixed
+}
