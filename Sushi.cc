@@ -1,142 +1,76 @@
-/*Name: Vinil Keshav
-  Assignment: Reading and Storing Commands
-  Description: This is the implementation file that contains the implementation of the Sushi class 
-  methods found in the header file.
-*/
-
 #include <iostream>
-#include <iomanip>
-#include <cctype>
-#include <cstdio>
-#include <algorithm>
 #include <fstream>
+#include <algorithm>
+#include <iomanip>
+#include <cstdio>
 #include "Sushi.hh"
 
 std::string Sushi::read_line(std::istream &in)
 {
-  //std::string response = "Read";
-  //return response;
-  std::string buffer;
-  char ch;
-  size_t count = 0;
-  bool exceeded = false;
-
-  // DZ: Very inefficient in C++; use std::getline
-  //read characters from an input stream
-  while (in.get(ch)) {
-    if (ch == '\n') {
-      break;
+  std::string line;
+  if(!std::getline (in, line)) {// Has the operation failed?
+    if(!in.eof()) { 
+      std::perror("getline");
     }
-    if (count < MAX_INPUT) {
-      buffer += ch;
-    } else {
-      exceeded = true;
-    }
-    ++count;
+    return "";
   }
-
-  if (in.bad()) {
-    std::perror("Input error");
+    
+  // Is the line empty?
+  if(std::all_of(line.begin(), line.end(), isspace)) {
     return "";
   }
 
-  if (exceeded) {
+  // Is the line too long?
+  if(line.size() > MAX_INPUT_SIZE) {
+    line.resize(MAX_INPUT_SIZE);
     std::cerr << "Line too long, truncated." << std::endl;
   }
-
-  // DZ: The first condition is redundant
-  if (buffer.empty() || std::all_of(buffer.begin(), buffer.end(), [](unsigned char c) { return std::isspace(c); })) {
-    return "";
-  }
-  return buffer; // A placeholder
+  
+  return line; 
 }
 
 bool Sushi::read_config(const char *fname, bool ok_if_missing)
 {
-  //Open file for reading
-  std::ifstream file(fname);
-
-  //Handles two situations if the file is unable to be opened
-  if (!file.is_open()) {
-    if (ok_if_missing) {
-      return true;
-    } else {
-      // DZ: Wrong use of perror
-      // std::perror("Can't open file");
+  // Try to open a config file
+  std::ifstream config_file(fname);
+  if (!config_file) {
+    if (!ok_if_missing) {
       std::perror(fname);
       return false;
     }
+    return true;
   }
 
-  //Reads the lines in the config file
-  while (file.good()) {
-    std::string line = read_line(file);
-
-    // DZ: This check will be done in `store_to_history`
-    //Skips empty lines
-    if (line.empty()) {
-      continue;
-    }
-
-    // DZ: This operation does not belong in this function
-    //Stores the lines in history
+  // Read the config file
+  while(!config_file.eof()) {
+    std::string line = read_line(config_file);
     store_to_history(line);
   }
-
-  //Prints error message if file could not be opened
-  if (file.bad()) {
-    // DZ: See above
-    std::perror("Can't open file");
-    return false;
-  }
-
-  // DZ: C++ closes all local ifstreams automatically
-  //Clear all previous flags set
-  file.clear();
-  //Close file
-  file.close();
-
-  // DZ: You cannot check the status of a closed file
-  //Print error if file is unable to be closed
-  if (file.fail()) {
-    std::perror("Can't close file");
-    return false;
-  }
-
-  return true; // A placeholder
+  
+  return true; 
 }
 
 void Sushi::store_to_history(std::string line)
 {
-  //If the line is nullptr, don't insert anything
   if (line.empty()) {
-    return;
+    return;    
   }
 
-  //insert new line at top of history
-  history.push_front(line);
-
-  //if history is full, remove oldest entry
-  if (history.size() > HISTORY_LENGTH) {
-    history.pop_back(); //removes oldest entry
+  // Is the history buffer full?
+  while (history.size() >= HISTORY_LENGTH) {
+    history.pop_front();
   }
+  
+  history.emplace_back(line);
 }
 
-void Sushi::show_history()
+void Sushi::show_history() const
 {
-  // DZ: Unused
-  int deque_size = history.size();
-  //Iterate through the deque backwards because the first line is at the back of the deque
-  for (int i=history.size()-1; i >= 0; i--) {
-    std::cout << std::setw(5)
-              << std::setfill(' ')
-              << history.size() - i
-              << "  "
-              << history[i] 
-              << std::endl;
+  int index = 1;
+  for (const auto &cmd: history) {
+    std::cout << std::setw(5) << index++ << "  " << cmd << std::endl;
   }
 }
-
 
 void Sushi::set_exit_flag()
 {
