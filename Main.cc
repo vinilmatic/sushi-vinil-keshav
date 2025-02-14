@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
   UNUSED(argc);
   UNUSED(argv);
   
-  /*
+  
   //Check that user is in $HOME directory
   const char *directory = std::getenv("HOME");
   // DZ: No need to exit because "ok if missing"
@@ -36,8 +36,8 @@ int main(int argc, char *argv[])
   std::string config_path = std::string(directory) + "/sushi.conf";
   //Convert string to char *
   const char *configFile = config_path.c_str();
-  */
-  const char *configFile = "sushi.conf";
+  
+  //const char *configFile = "sushi.conf";
 
   //Check if system was able to read config file
   if (my_shell.read_config(configFile, true)) {

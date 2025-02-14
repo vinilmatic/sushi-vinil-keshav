@@ -89,7 +89,7 @@ bool Sushi::read_config(const char *fname, bool ok_if_missing)
   //Prints error message if file could not be opened
   if (file.bad()) {
     // DZ: See above
-    std::perror("Can't open file");
+    std::perror(fname);
     return false;
   }
 
