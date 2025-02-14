@@ -14,41 +14,27 @@
 
 std::string Sushi::read_line(std::istream &in)
 {
-  //std::string response = "Read";
-  //return response;
-  std::string buffer;
-  char ch;
-  size_t count = 0;
-  bool exceeded = false;
-
-  // DZ: Very inefficient in C++; use std::getline
-  //read characters from an input stream
-  while (in.get(ch)) {
-    if (ch == '\n') {
-      break;
+  //Used Zinoviev's read_line solution to make it more efficient
+  std::string line;
+  if(!std::getline (in, line)) {// Has the operation failed?
+    if(!in.eof()) { 
+      std::perror("getline");
     }
-    if (count < MAX_INPUT) {
-      buffer += ch;
-    } else {
-      exceeded = true;
-    }
-    ++count;
+    return "";
   }
-
-  if (in.bad()) {
-    std::perror("Input error");
+    
+  // Is the line empty?
+  if(std::all_of(line.begin(), line.end(), isspace)) {
     return "";
   }
 
-  if (exceeded) {
+  // Is the line too long?
+  if(line.size() > MAX_INPUT) {
+    line.resize(MAX_INPUT);
     std::cerr << "Line too long, truncated." << std::endl;
   }
-
-  // DZ: The first condition is redundant
-  if (buffer.empty() || std::all_of(buffer.begin(), buffer.end(), [](unsigned char c) { return std::isspace(c); })) {
-    return "";
-  }
-  return buffer; // A placeholder
+  
+  return line; // A placeholder
 }
 
 bool Sushi::read_config(const char *fname, bool ok_if_missing)
@@ -61,8 +47,6 @@ bool Sushi::read_config(const char *fname, bool ok_if_missing)
     if (ok_if_missing) {
       return true;
     } else {
-      // DZ: Wrong use of perror
-      // std::perror("Can't open file");
       std::perror(fname);
       return false;
     }
@@ -88,7 +72,6 @@ bool Sushi::read_config(const char *fname, bool ok_if_missing)
 
   //Prints error message if file could not be opened
   if (file.bad()) {
-    // DZ: See above
     std::perror(fname);
     return false;
   }
@@ -98,13 +81,6 @@ bool Sushi::read_config(const char *fname, bool ok_if_missing)
   file.clear();
   //Close file
   file.close();
-
-  // DZ: You cannot check the status of a closed file
-  //Print error if file is unable to be closed
-  if (file.fail()) {
-    std::perror("Can't close file");
-    return false;
-  }
 
   return true; // A placeholder
 }
@@ -127,8 +103,6 @@ void Sushi::store_to_history(std::string line)
 
 void Sushi::show_history()
 {
-  // DZ: Unused
-  int deque_size = history.size();
   //Iterate through the deque backwards because the first line is at the back of the deque
   for (int i=history.size()-1; i >= 0; i--) {
     std::cout << std::setw(5)
