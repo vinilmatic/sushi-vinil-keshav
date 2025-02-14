@@ -71,6 +71,7 @@ bool Sushi::read_config(const char *fname, bool ok_if_missing)
   //Reads the lines in the config file
   while (file.good()) {
     std::string line = read_line(file);
+    int result = parse_command(line);
 
     // DZ: This check will be done in `store_to_history`
     //Skips empty lines
@@ -80,7 +81,9 @@ bool Sushi::read_config(const char *fname, bool ok_if_missing)
 
     // DZ: This operation does not belong in this function
     //Stores the lines in history
-    store_to_history(line);
+    if (result == 0) {
+      store_to_history(line);
+    }
   }
 
   //Prints error message if file could not be opened
@@ -141,9 +144,10 @@ void Sushi::show_history()
 void Sushi::set_exit_flag()
 {
   // To be implemented
+  exit_flag = true;
 }
 
 bool Sushi::get_exit_flag() const
 {
-  return false; // To be fixed
+  return exit_flag; // To be fixed
 }
