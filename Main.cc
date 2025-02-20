@@ -23,6 +23,8 @@ int main(int argc, char *argv[])
   UNUSED(argc);
   UNUSED(argv);
   
+  // New function call
+  Sushi::prevent_interruption();
   
   //Check that user is in $HOME directory
   const char *directory = std::getenv("HOME");

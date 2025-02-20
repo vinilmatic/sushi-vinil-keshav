@@ -2,6 +2,10 @@
 
 std::string *Sushi::unquote_and_dup(const char* s)
 {
+  // DZ: This implementation is very inefficient, it is more than 10 times
+  // slower than it could be. Also, you do not need 12 size_t variables,
+  // one is enough
+  
   //Initialize variables
   std::string conversion = s;
   size_t alert(0);
@@ -27,7 +31,7 @@ std::string *Sushi::unquote_and_dup(const char* s)
     backspace++;
   }
   while ((escape = conversion.find("\\e", escape)) != std::string::npos){
-    conversion.replace(escape, 2, "\e");
+    conversion.replace(escape, 2, "\x1B" /* "\e" is obsolete */);
     escape++;
   }
   while ((formfeed = conversion.find("\\f", formfeed)) != std::string::npos){
@@ -55,7 +59,7 @@ std::string *Sushi::unquote_and_dup(const char* s)
     backslash++;
   }
   while ((apostrophe = conversion.find("\\'", apostrophe)) != std::string::npos){
-    conversion.replace(apostrophe, 2, "\'");
+    conversion.replace(apostrophe, 2, "'" /*"\'"*/);
     apostrophe++;
   }
   while ((quotation = conversion.find("\\\"", quotation)) != std::string::npos){
@@ -63,7 +67,7 @@ std::string *Sushi::unquote_and_dup(const char* s)
     quotation++;
   }
   while ((question = conversion.find("\\?", question)) != std::string::npos){
-    conversion.replace(question, 2, "\?");
+    conversion.replace(question, 2, "?" /*"\?"*/);
     question++;
   }
 
