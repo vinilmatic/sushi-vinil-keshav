@@ -10,6 +10,11 @@
 #include <cstdio>
 #include <algorithm>
 #include <fstream>
+#include <csignal>
+#include <cstring>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
 #include "Sushi.hh"
 
 std::string Sushi::read_line(std::istream &in)
@@ -134,26 +139,67 @@ int Sushi::spawn(Program *exe, bool bg)
   UNUSED(exe);
   UNUSED(bg);
 
+  char* const* argv = exe->vector2array();
+
+  int child_pid;
+
+  switch(child_pid = fork()) {
+    case -1:
+      std::perror("fork");
+      exit(EXIT_FAILURE);
+    case 0:
+      execvp(argv[0], argv);
+      std::perror("execvp");
+      exe->free_array(argv);
+      exit(EXIT_FAILURE);
+    default:
+      if(waitpid(child_pid, NULL, 0)==-1){
+        std::perror("waitpid");
+        return EXIT_FAILURE;
+      }
+  }
+
   return EXIT_SUCCESS;
 }
 
+//bool Sushi::exit_requested = false;
+
 void Sushi::prevent_interruption() {
   // Must be implemented
+  struct sigaction cancel_action;
+  memset(&cancel_action, 0, sizeof(cancel_action));
+  cancel_action.sa_handler = refuse_to_die;
+  cancel_action.sa_flags=0;
+  sigemptyset(&cancel_action.sa_mask);
+  sigaction(SIGINT, &cancel_action, NULL);
 }
 
 void Sushi::refuse_to_die(int signo) {
   // Must be implemented
   UNUSED(signo);
+  std::cerr << "Type exit to exit the shell" << std::endl;
 }
 
 char* const* Program::vector2array() {
   // Must be implemented
-  return nullptr; 
+  if (!args || args->empty()) return nullptr;  // Handle empty input
+
+  size_t size = args->size();
+  char** argv = new char*[size + 1];  // Allocate array of char* (one extra for NULL)
+
+  for (size_t i = 0; i < size; i++) {
+      argv[i] = const_cast<char*>((*args)[i]->c_str());  // Convert std::string* to char*
+  }
+
+  argv[size] = nullptr;  // Null-terminate the array
+  return argv;
+  //return nullptr; 
 }
 
 void Program::free_array(char *const argv[]) {
   // Must be implemented
   UNUSED(argv);
+  delete[] argv;
 }
 
 Program::~Program() {

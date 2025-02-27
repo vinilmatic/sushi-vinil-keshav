@@ -41,6 +41,8 @@ private:
   // Frees the memory allocated by vector2array()
   void free_array(char *const argv[]);
 
+  friend class Sushi;
+
 public:
   Program(std::vector<std::string*> *args) : args(args) {};
   ~Program();
@@ -74,6 +76,7 @@ public:
   int spawn(Program *exe, bool bg); // New method
   static void prevent_interruption(); // New method
   static void refuse_to_die(int signo); // New method
+  static bool exit_requested;
   static const std::string DEFAULT_PROMPT;
 };
 
