@@ -163,15 +163,11 @@ int Sushi::spawn(Program *exe, bool bg)
   return EXIT_SUCCESS;
 }
 
-//bool Sushi::exit_requested = false;
-
 void Sushi::prevent_interruption() {
   // Must be implemented
   struct sigaction cancel_action;
-  //memset(&cancel_action, 0, sizeof(cancel_action));
   cancel_action.sa_handler = refuse_to_die;
   cancel_action.sa_flags=SA_RESTART;
-  //sigemptyset(&cancel_action.sa_mask);
   sigaction(SIGINT, &cancel_action, NULL);
 }
 
@@ -179,8 +175,7 @@ void Sushi::refuse_to_die(int signo) {
   // Must be implemented
   UNUSED(signo);
   std::cerr << "Type exit to exit the shell" << std::endl;
-  //std::cin.clear();  // Clears the error flag
-  //std::cin.ignore(); 
+  //std::cin.clear();  // Clears the error flag 
 }
 
 char* const* Program::vector2array() {
@@ -194,9 +189,8 @@ char* const* Program::vector2array() {
       argv[i] = const_cast<char*>((*args)[i]->c_str());  // Convert std::string* to char*
   }
 
-  argv[size] = nullptr;  // Null-terminate the array
-  return argv;
-  //return nullptr; 
+  argv[size] = nullptr;
+  return argv; 
 }
 
 void Program::free_array(char *const argv[]) {
