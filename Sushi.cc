@@ -169,7 +169,7 @@ void Sushi::prevent_interruption() {
   struct sigaction cancel_action;
   memset(&cancel_action, 0, sizeof(cancel_action));
   cancel_action.sa_handler = refuse_to_die;
-  cancel_action.sa_flags=0;
+  cancel_action.sa_flags=SA_RESTART;
   sigemptyset(&cancel_action.sa_mask);
   sigaction(SIGINT, &cancel_action, NULL);
 }
