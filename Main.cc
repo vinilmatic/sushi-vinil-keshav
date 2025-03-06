@@ -47,24 +47,6 @@ int main(int argc, char *argv[])
   } else {
     return EXIT_FAILURE;
   }
-  /*
-  //std::string st_test = "Hello\nWorld";
-  std::string input = "Hello\\nWorld\\nyurr\\tmyguyyy\\a!!!!!!";
-  //std::string input = "\\a\\b\\e\\f\\n\\r\\t\\v\\\\\\'\\\"\\?";
-
-  std::cout << "Before unquoting and duplicating:" << std::endl;
-  std::cout << input << std::endl;
-
-  // Call the function
-  std::string* result = my_shell.unquote_and_dup(input.c_str());
-
-  std::cout << "\nAfter unquoting and duplicating:" << std::endl;
-  std::cout << *result << std::endl;
-
-    // Clean up the dynamically allocated memory
-  delete result;
-  //std::cout << "Hello" << std::endl;
-  // A placeholder*/
 
   while (my_shell.get_exit_flag() == false) {
 

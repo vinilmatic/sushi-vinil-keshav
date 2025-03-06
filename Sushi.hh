@@ -35,20 +35,18 @@ private:
   Redirection redir;
   Program *pipe; // The previous program in the pipeline, if any; NULL otherwise
 
-  // Helper methods
-  // Converts the args to whatever `execvp` expects
-  char* const* vector2array();
-  // Frees the memory allocated by vector2array()
-  void free_array(char *const argv[]);
-
-  friend class Sushi;
-
 public:
   Program(std::vector<std::string*> *args) : args(args) {};
   ~Program();
   void set_pipe(Program *pipe) { this->pipe = pipe; };
   void set_redir(Redirection &redir) { this->redir = redir; };
   std::string progname() { return *args->at(0); }
+
+  // Helper methods
+  // Converts the args to whatever `execvp` expects
+  char* const* vector2array();
+  // Frees the memory allocated by vector2array()
+  void free_array(char *const argv[]);
 };
 
 // Old class(es)

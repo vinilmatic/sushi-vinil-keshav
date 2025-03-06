@@ -5,73 +5,45 @@ std::string *Sushi::unquote_and_dup(const char* s)
   // DZ: This implementation is very inefficient, it is more than 10 times
   // slower than it could be. Also, you do not need 12 size_t variables,
   // one is enough
+
+  //Replaced my inefficient implementation with Professor Zinoviev's implementation
   
-  //Initialize variables
-  std::string conversion = s;
-  size_t alert(0);
-  size_t backspace(0);
-  size_t escape(0);
-  size_t formfeed(0);
-  size_t newline(0);
-  size_t carr_return(0);
-  size_t hor_tab(0);
-  size_t ver_tab(0);
-  size_t backslash(0);
-  size_t apostrophe(0);
-  size_t quotation(0);
-  size_t question(0);
-
-  //Replace escape sequences with actual values
-  while ((alert = conversion.find("\\a", alert)) != std::string::npos){
-    conversion.replace(alert, 2, "\a");
-    alert++;
+  if (!s) { // Not required, but it is safer this way
+    return nullptr;
   }
-  while ((backspace = conversion.find("\\b", backspace)) != std::string::npos){
-    conversion.replace(backspace, 2, "\b");
-    backspace++;
+  
+  std::string result;
+  while (*s) {
+    if (*s == '\\') {
+      if (*(s + 1)) {
+	switch (*(s + 1)) {
+	case 'a': result += '\a'; break;
+	case 'b': result += '\b'; break;
+	case 'e': result += '\x1B'; break;
+	case 'f': result += '\f'; break;
+	case 'n': result += '\n'; break;
+	case 'r': result += '\r'; break;
+	case 't': result += '\t'; break;
+	case 'v': result += '\v'; break;
+	case '\\': result += '\\'; break;
+	case '\'': result += '\''; break;
+	case '"': result += '"'; break;
+	default:
+	  result += *s;
+	  result += *(s + 1);
+	  break;
+	}
+	s += 2; // Skip escape sequence
+      } else { // Dangling \ at the EOS; undefined behavior
+	result += '\\';
+	return new std::string(result); 
+      }
+    } else {
+      result += *s;
+      ++s;
+    }
   }
-  while ((escape = conversion.find("\\e", escape)) != std::string::npos){
-    conversion.replace(escape, 2, "\x1B" /* "\e" is obsolete */);
-    escape++;
-  }
-  while ((formfeed = conversion.find("\\f", formfeed)) != std::string::npos){
-    conversion.replace(formfeed, 2, "\f");
-    formfeed++;
-  }
-  while ((newline = conversion.find("\\n", newline)) != std::string::npos){
-    conversion.replace(newline, 2, "\n");
-    newline++;
-  }
-  while ((carr_return = conversion.find("\\r", carr_return)) != std::string::npos){
-    conversion.replace(carr_return, 2, "\r");
-    carr_return++;
-  }
-  while ((hor_tab = conversion.find("\\t", hor_tab)) != std::string::npos){
-    conversion.replace(hor_tab, 2, "\t");
-    hor_tab++;
-  }
-  while ((ver_tab = conversion.find("\\v", ver_tab)) != std::string::npos){
-    conversion.replace(ver_tab, 2, "\v");
-    ver_tab++;
-  }
-  while ((backslash = conversion.find("\\\\", backslash)) != std::string::npos){
-    conversion.replace(backslash, 2, "\\");
-    backslash++;
-  }
-  while ((apostrophe = conversion.find("\\'", apostrophe)) != std::string::npos){
-    conversion.replace(apostrophe, 2, "'" /*"\'"*/);
-    apostrophe++;
-  }
-  while ((quotation = conversion.find("\\\"", quotation)) != std::string::npos){
-    conversion.replace(quotation, 2, "\"");
-    quotation++;
-  }
-  while ((question = conversion.find("\\?", question)) != std::string::npos){
-    conversion.replace(question, 2, "?" /*"\?"*/);
-    question++;
-  }
-
-  return new std::string(conversion); // Must be changed
+  return new std::string(result);// Must be changed
 }
 
 void Sushi::re_parse(int i) {
