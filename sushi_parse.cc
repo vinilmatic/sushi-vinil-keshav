@@ -2,12 +2,6 @@
 
 std::string *Sushi::unquote_and_dup(const char* s)
 {
-  // DZ: This implementation is very inefficient, it is more than 10 times
-  // slower than it could be. Also, you do not need 12 size_t variables,
-  // one is enough
-
-  //Replaced my inefficient implementation with Professor Zinoviev's implementation
-  
   if (!s) { // Not required, but it is safer this way
     return nullptr;
   }
@@ -43,29 +37,41 @@ std::string *Sushi::unquote_and_dup(const char* s)
       ++s;
     }
   }
-  return new std::string(result);// Must be changed
+  return new std::string(result); 
+}
+
+bool Sushi::re_execute() {
+  if(!redo.empty()) {
+    if (!parse_command(redo)) {
+      store_to_history(redo);
+    }
+    redo = "";
+    return true;
+  }
+  return false;
 }
 
 void Sushi::re_parse(int i) {
-  UNUSED(i);
-// Must be implemented
-  int max_size = history.size();
-  if (i == 0 || i > max_size) {
-    std::cerr << "Error: !" << i << ": event not found" << std::endl;
+  size_t index = static_cast<size_t>(i);
+  if (index == 0 || index > history.size()) {
+    std::cerr << "!" << index << ": event not found" << std::endl;
   } else {
-    std::string command = history[history.size()-i];
-    int result = parse_command(command);
-    if (result != 0) {
-      store_to_history(command);
-    }
-  }  
+    redo = history[index - 1];
+  }
 }
 
 //---------------------------------------------------------------
-// Do not modify this function YET
+// Implement the function
 std::string *Sushi::getenv(const char* s) 
 {
   return new std::string(s); // Must be changed - eventually
+}
+
+// Implement the function
+void Sushi::putenv(const std::string* name, const std::string* value)
+{
+  UNUSED(name);
+  UNUSED(value);
 }
 
 //---------------------------------------------------------------
