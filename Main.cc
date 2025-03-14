@@ -20,10 +20,10 @@ const std::string Sushi::DEFAULT_PROMPT = "sushi> ";
 
 int main(int argc, char *argv[])
 {
-  UNUSED(argc);
-  UNUSED(argv);
+  // Use argc and argv!
   
-  // New function call
+  // Move this into the constructor
+  //-------------------------------------------
   Sushi::prevent_interruption();
   
   //Check that user is in $HOME directory
@@ -45,9 +45,14 @@ int main(int argc, char *argv[])
   if (my_shell.read_config(configFile, true)) {
 
   } else {
+    // DZ: Nope, just continue
     return EXIT_FAILURE;
   }
 
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  // Move this into the main loop method
+  //-------------------------------------------
   while (my_shell.get_exit_flag() == false) {
 
     std::cout << Sushi::DEFAULT_PROMPT;
@@ -61,5 +66,8 @@ int main(int argc, char *argv[])
     }
   }
   
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+  my_shell.mainloop();
   return EXIT_SUCCESS;
 }

@@ -150,7 +150,9 @@ int Sushi::spawn(Program *exe, bool bg)
       exit(EXIT_FAILURE);
     case 0:
       execvp(argv[0], argv);
-      std::perror("execvp");
+      // DZ: Incorrect use of perror
+      // std::perror("execvp");
+      std::perror(argv[0]);
       exe->free_array(argv);
       exit(EXIT_FAILURE);
     default:
@@ -173,10 +175,13 @@ void Sushi::prevent_interruption() {
 }
 
 void Sushi::refuse_to_die(int signo) {
-  // Must be implemented
   UNUSED(signo);
   std::cerr << "Type exit to exit the shell" << std::endl;
   //std::cin.clear();  // Clears the error flag 
+}
+
+void Sushi::mainloop() {
+  // Must be implemented
 }
 
 char* const* Program::vector2array() {
