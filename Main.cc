@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
   
   // Move this into the constructor
   //-------------------------------------------
-  Sushi::prevent_interruption();
+  /*Sushi::prevent_interruption();
   
   //Check that user is in $HOME directory
   const char *directory = std::getenv("HOME");
@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
     if (my_shell.parse_command(line) == 0) {
       my_shell.store_to_history(line);
     }
-  }
+  }*/
   
   //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

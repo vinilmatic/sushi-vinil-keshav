@@ -53,7 +53,8 @@ private:
   bool exit_flag = false; 
 
 public:
-  Sushi() : history() {};
+  Sushi();
+  //Sushi() : history() {};
   static std::string read_line(std::istream &in);
   static std::string *unquote_and_dup(const char *s); 
   static std::string *getenv(const char *name); 

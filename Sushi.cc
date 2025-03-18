@@ -18,6 +18,33 @@
 #include <limits>
 #include "Sushi.hh"
 
+Sushi::Sushi() : history() {
+  // Move this into the constructor
+  //-------------------------------------------
+  Sushi::prevent_interruption();
+  
+  //Check that user is in $HOME directory
+  const char *directory = std::getenv("HOME");
+  // DZ: No need to exit because "ok if missing"
+  if (!directory) {
+    std::cerr << "Error: Not in HOME environment variable";
+  }
+
+  //Build path to sushi.conf
+  std::string config_path = std::string(directory) + "/sushi.conf";
+  //Convert string to char *
+  const char *configFile = config_path.c_str();
+  
+  //const char *configFile = "sushi.conf";
+
+  //Check if system was able to read config file
+  if (my_shell.read_config(configFile, true)) {
+
+  }
+
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+}
+
 std::string Sushi::read_line(std::istream &in)
 {
   //Used Zinoviev's read_line solution to make it more efficient
@@ -143,6 +170,7 @@ int Sushi::spawn(Program *exe, bool bg)
   char* const* argv = exe->vector2array();
 
   int child_pid;
+  int status;
 
   switch(child_pid = fork()) {
     case -1:
@@ -156,11 +184,21 @@ int Sushi::spawn(Program *exe, bool bg)
       exe->free_array(argv);
       exit(EXIT_FAILURE);
     default:
-      if(waitpid(child_pid, NULL, 0)==-1){
+      if(waitpid(child_pid, &status, 0)==-1){
         std::perror("waitpid");
         return EXIT_FAILURE;
       }
   }
+
+  /*if (WIFEXITED(status)) {
+    int exit_status = WEXITSTATUS(status);
+    std::string exit_string = std::to_string(exit_status);
+    setenv("?", exit_string.c_str(), 1);
+  }*/
+
+  int exit_status = WEXITSTATUS(status);
+  std::string exit_string = std::to_string(exit_status);
+  setenv("?", exit_string.c_str(), 1);
 
   return EXIT_SUCCESS;
 }
@@ -182,6 +220,22 @@ void Sushi::refuse_to_die(int signo) {
 
 void Sushi::mainloop() {
   // Must be implemented
+  // Move this into the main loop method
+  //-------------------------------------------
+  while (my_shell.get_exit_flag() == false) {
+
+    std::cout << Sushi::DEFAULT_PROMPT;
+    
+    //Read line entered by user
+    std::string line = my_shell.read_line(std::cin);
+    //my_shell.parse_command(line);
+    //Store line in history
+    if (my_shell.parse_command(line) == 0) {
+      my_shell.store_to_history(line);
+    }
+  }
+  
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 }
 
 char* const* Program::vector2array() {
