@@ -21,6 +21,21 @@ const std::string Sushi::DEFAULT_PROMPT = "sushi> ";
 int main(int argc, char *argv[])
 {
   // Use argc and argv!
+  //std::cout << argc << std::endl;
+  if (argc == 1) {
+    std::cerr << "Missing script file" << std::endl;
+    exit(EXIT_FAILURE);
+  }
+  for (int i=1; i < argc; i++) {
+    bool success = my_shell.read_config(argv[i], false);
+    if (success==true) {
+      continue;
+    } else {
+      std::cerr << "Error reading script file" << std::endl;
+      exit(EXIT_FAILURE);
+    }
+    
+  }
   
   // Move this into the constructor
   //-------------------------------------------

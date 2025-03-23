@@ -28,6 +28,7 @@ Sushi::Sushi() : history() {
   // DZ: No need to exit because "ok if missing"
   if (!directory) {
     std::cerr << "Error: Not in HOME environment variable";
+    return;
   }
 
   //Build path to sushi.conf
@@ -165,7 +166,7 @@ int Sushi::spawn(Program *exe, bool bg)
 {
   // Must be implemented
   UNUSED(exe);
-  UNUSED(bg);
+  //UNUSED(bg);
 
   char* const* argv = exe->vector2array();
 
@@ -184,9 +185,14 @@ int Sushi::spawn(Program *exe, bool bg)
       exe->free_array(argv);
       exit(EXIT_FAILURE);
     default:
-      if(waitpid(child_pid, &status, 0)==-1){
-        std::perror("waitpid");
-        return EXIT_FAILURE;
+      if (bg == false) {
+        if(waitpid(child_pid, &status, 0)==-1){
+          std::perror("waitpid");
+          return EXIT_FAILURE;
+        }
+      } else {
+        status = 0;
+        return EXIT_SUCCESS;
       }
   }
 
@@ -224,7 +230,16 @@ void Sushi::mainloop() {
   //-------------------------------------------
   while (my_shell.get_exit_flag() == false) {
 
-    std::cout << Sushi::DEFAULT_PROMPT;
+    std::string* env_prompt = Sushi::getenv("PS1");
+    if (*env_prompt == "") {
+      std::cout << Sushi::DEFAULT_PROMPT;
+    } else {
+      std::cout << *env_prompt;
+    }
+
+    delete env_prompt;
+
+    //std::cout << Sushi::DEFAULT_PROMPT;
     
     //Read line entered by user
     std::string line = my_shell.read_line(std::cin);
