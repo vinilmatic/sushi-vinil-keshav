@@ -19,8 +19,7 @@
 #include "Sushi.hh"
 
 Sushi::Sushi() : history() {
-  // Move this into the constructor
-  //-------------------------------------------
+
   Sushi::prevent_interruption();
   
   //Check that user is in $HOME directory
@@ -43,7 +42,6 @@ Sushi::Sushi() : history() {
 
   }
 
-  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 }
 
 std::string Sushi::read_line(std::istream &in)
@@ -196,15 +194,15 @@ int Sushi::spawn(Program *exe, bool bg)
       }
   }
 
-  /*if (WIFEXITED(status)) {
+  if (WIFEXITED(status)) {
     int exit_status = WEXITSTATUS(status);
     std::string exit_string = std::to_string(exit_status);
     setenv("?", exit_string.c_str(), 1);
-  }*/
+  }
 
-  int exit_status = WEXITSTATUS(status);
+  /*int exit_status = WEXITSTATUS(status);
   std::string exit_string = std::to_string(exit_status);
-  setenv("?", exit_string.c_str(), 1);
+  setenv("?", exit_string.c_str(), 1);*/
 
   return EXIT_SUCCESS;
 }
@@ -226,8 +224,6 @@ void Sushi::refuse_to_die(int signo) {
 
 void Sushi::mainloop() {
   // Must be implemented
-  // Move this into the main loop method
-  //-------------------------------------------
   while (my_shell.get_exit_flag() == false) {
 
     std::string* env_prompt = Sushi::getenv("PS1");
@@ -250,7 +246,6 @@ void Sushi::mainloop() {
     }
   }
   
-  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 }
 
 char* const* Program::vector2array() {
