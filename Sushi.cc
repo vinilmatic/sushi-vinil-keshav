@@ -189,7 +189,8 @@ int Sushi::spawn(Program *exe, bool bg)
           return EXIT_FAILURE;
         }
       } else {
-        status = 0;
+        // DZ: Who cares?
+	// status = 0;
         return EXIT_SUCCESS;
       }
   }
@@ -222,13 +223,14 @@ void Sushi::refuse_to_die(int signo) {
   //std::cin.clear();  // Clears the error flag 
 }
 
+// DZ: Do ot refer to an objcet in a method
 void Sushi::mainloop() {
   // Must be implemented
-  while (my_shell.get_exit_flag() == false) {
+  while (/*my_shell.*/get_exit_flag() == false) {
 
-    std::string* env_prompt = Sushi::getenv("PS1");
+    std::string* env_prompt = /*Sushi::*/getenv("PS1");
     if (*env_prompt == "") {
-      std::cout << Sushi::DEFAULT_PROMPT;
+      std::cout << /*Sushi::*/DEFAULT_PROMPT;
     } else {
       std::cout << *env_prompt;
     }
@@ -238,11 +240,11 @@ void Sushi::mainloop() {
     //std::cout << Sushi::DEFAULT_PROMPT;
     
     //Read line entered by user
-    std::string line = my_shell.read_line(std::cin);
+    std::string line = /*my_shell.*/read_line(std::cin);
     //my_shell.parse_command(line);
     //Store line in history
-    if (my_shell.parse_command(line) == 0) {
-      my_shell.store_to_history(line);
+    if (/*my_shell.*/parse_command(line) == 0) {
+      /*my_shell.*/store_to_history(line);
     }
   }
   
