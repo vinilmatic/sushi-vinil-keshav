@@ -37,6 +37,7 @@ public:
   void set_pipe(Program *pipe) { this->pipe = pipe; };
   void set_redir(Redirection &redir) { this->redir = redir; };
   std::string progname() { return *args->at(0); }
+  Program* get_pipe() const { return pipe; } // getter for accessing pipe
 
   // Helper methods
   // Converts the args to whatever `execvp` expects

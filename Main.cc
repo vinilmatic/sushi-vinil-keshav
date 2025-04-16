@@ -30,18 +30,9 @@ int main(int argc, char *argv[])
   */
   for (int i=1; i < argc; i++) {
     // DZ: This is really BAD. Suggested:
-    // if(!my_shell.read_config(argv[i], false)) {
-    //   exit(EXIT_FAILURE);
-    // }
-    bool success = my_shell.read_config(argv[i], false);
-    if (success==true) {
-      continue;
-    } else {
-      // DZ: already reported
-      // std::cerr << "Error reading script file" << std::endl;
+    if(!my_shell.read_config(argv[i], false)) {
       exit(EXIT_FAILURE);
-     }
-    
+    }
   }
 
   my_shell.mainloop();

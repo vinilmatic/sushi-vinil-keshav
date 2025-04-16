@@ -163,19 +163,56 @@ bool Sushi::get_exit_flag() const
 int Sushi::spawn(Program *exe, bool bg)
 {
   // Must be implemented
-  UNUSED(exe);
+  //UNUSED(exe);
   //UNUSED(bg);
+  Program *previous = exe->get_pipe();
+
+  if (!previous) {
+    // No pipe, just run the single command
+    char* const* argv = exe->vector2array();
+    int pid, status;
+
+    switch (pid = fork()) {
+      case -1:
+        std::perror("fork");
+        return EXIT_FAILURE;
+      case 0:
+        execvp(argv[0], argv);
+        std::perror(argv[0]);
+        exe->free_array(argv);
+        exit(EXIT_FAILURE);
+      default:
+        if (!bg) {
+          if (waitpid(pid, &status, 0) == -1) {
+            std::perror("waitpid");
+            return EXIT_FAILURE;
+          }
+          if (WIFEXITED(status)) {
+            int exit_status = WEXITSTATUS(status);
+            std::string exit_string = std::to_string(exit_status);
+            setenv("?", exit_string.c_str(), 1);
+          }
+        }
+        return EXIT_SUCCESS;
+    }
+  }
 
   char* const* argv = exe->vector2array();
+  char* const* argv2 = previous->vector2array();
 
-  int child_pid;
+  int child_pid_last, child_pid_previous;
   int status;
+  int file[2];
+  pipe(file);
 
-  switch(child_pid = fork()) {
+  switch(child_pid_last = fork()) {
     case -1:
       std::perror("fork");
       exit(EXIT_FAILURE);
     case 0:
+      close(file[1]); // close write end
+      dup2(file[0], STDIN_FILENO); // redirect read end to stdin
+      close(file[0]);
       execvp(argv[0], argv);
       // DZ: Incorrect use of perror
       // std::perror("execvp");
@@ -183,30 +220,54 @@ int Sushi::spawn(Program *exe, bool bg)
       exe->free_array(argv);
       exit(EXIT_FAILURE);
     default:
-      if (bg == false) {
-        if(waitpid(child_pid, &status, 0)==-1){
-          std::perror("waitpid");
-          return EXIT_FAILURE;
-        }
-      } else {
-        // DZ: Who cares?
-	// status = 0;
-        return EXIT_SUCCESS;
-      }
+      break;
   }
 
-  if (WIFEXITED(status)) {
-    int exit_status = WEXITSTATUS(status);
-    std::string exit_string = std::to_string(exit_status);
-    setenv("?", exit_string.c_str(), 1);
+  switch(child_pid_previous = fork()) {
+    case -1:
+      std::perror("fork");
+      exit(EXIT_FAILURE);
+    case 0:
+      close(file[0]); // close read end
+      dup2(file[1], STDOUT_FILENO); // redirect write end to stdout
+      close(file[1]);
+      execvp(argv2[0], argv2);
+      // DZ: Incorrect use of perror
+      // std::perror("execvp");
+      std::perror(argv2[0]);
+      previous->free_array(argv2);
+      exit(EXIT_FAILURE);
+    default:
+      break;
   }
 
+  close(file[0]);
+  close(file[1]);
+
+  if (!bg) {
+    // Wait for both children
+    if (waitpid(child_pid_previous, &status, 0) == -1) {
+      std::perror("waitpid");
+      return EXIT_FAILURE;
+    }
+    if (waitpid(child_pid_last, &status, 0) == -1) {
+      std::perror("waitpid");
+      return EXIT_FAILURE;
+    }
+
+    if (WIFEXITED(status)) {
+      int exit_status = WEXITSTATUS(status);
+      std::string exit_string = std::to_string(exit_status);
+      setenv("?", exit_string.c_str(), 1);
+    }
+  }
   /*int exit_status = WEXITSTATUS(status);
   std::string exit_string = std::to_string(exit_status);
   setenv("?", exit_string.c_str(), 1);*/
 
   return EXIT_SUCCESS;
 }
+
 
 void Sushi::prevent_interruption() {
   // Must be implemented
