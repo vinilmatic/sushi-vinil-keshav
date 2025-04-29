@@ -16,6 +16,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <limits>
+#include <fcntl.h>
 #include "Sushi.hh"
 
 Sushi::Sushi() : history() {
@@ -177,6 +178,24 @@ int Sushi::spawn(Program *exe, bool bg)
         std::perror("fork");
         return EXIT_FAILURE;
       case 0:
+        // Input redirection
+        if (exe->get_redir_in()) {
+          int input_file = open(exe->get_redir_in()->c_str(), O_RDONLY);
+          dup2(input_file, STDIN_FILENO);
+          close(input_file);
+        }
+        // Output redirection
+        if (exe->get_redir_out1()) {
+          int output_file1 = open(exe->get_redir_out1()->c_str(), O_WRONLY | O_CREAT, 0644);
+          dup2(output_file1, STDOUT_FILENO);
+          close(output_file1);
+        }
+        // Append redirection
+        if (exe->get_redir_out2()) {
+          int append_file = open(exe->get_redir_out2()->c_str(), O_APPEND | O_CREAT | O_WRONLY, 0644);
+          dup2(append_file, STDOUT_FILENO);
+          close(append_file);
+        }
         execvp(argv[0], argv);
         std::perror(argv[0]);
         exe->free_array(argv);
@@ -213,6 +232,20 @@ int Sushi::spawn(Program *exe, bool bg)
       close(file[1]); // close write end
       dup2(file[0], STDIN_FILENO); // redirect read end to stdin
       close(file[0]);
+
+      // Output redirection
+      if (exe->get_redir_out1()) {
+        int output_file1 = open(exe->get_redir_out1()->c_str(), O_WRONLY | O_CREAT, 0644);
+        dup2(output_file1, STDOUT_FILENO);
+        close(output_file1);
+      }
+      // Append redirection
+      if (exe->get_redir_out2()) {
+        int append_file = open(exe->get_redir_out2()->c_str(), O_APPEND | O_CREAT | O_WRONLY, 0644);
+        dup2(append_file, STDOUT_FILENO);
+        close(append_file);
+      }
+
       execvp(argv[0], argv);
       // DZ: Incorrect use of perror
       // std::perror("execvp");
@@ -231,6 +264,14 @@ int Sushi::spawn(Program *exe, bool bg)
       close(file[0]); // close read end
       dup2(file[1], STDOUT_FILENO); // redirect write end to stdout
       close(file[1]);
+
+      // Input redirection
+      if (previous->get_redir_in()) {
+        int input_file = open(previous->get_redir_in()->c_str(), O_RDONLY);
+        dup2(input_file, STDIN_FILENO);
+        close(input_file);
+      }
+      
       execvp(argv2[0], argv2);
       // DZ: Incorrect use of perror
       // std::perror("execvp");
@@ -314,12 +355,23 @@ void Sushi::mainloop() {
 // Two new methods to implement
 void Sushi::pwd()
 {
-  std::cerr << "pwd: not implemented yet" << std::endl;
+  const size_t size = 1024;
+  char buffer[size];
+  if (getcwd(buffer, size)) {
+    std::cout << buffer << std::endl;
+  } else {
+    std::cerr << "Error getting working directory" << std::endl;
+  }
 }
 
 void Sushi::cd(std::string *s)
 {
-  std::cerr << "cd(" << *s << "): not implemented yet" << std::endl;
+  const char* new_wd = s->c_str();
+  if (chdir(new_wd) == -1){
+    std::perror("cd");
+  }
+  delete s;
+  //std::cerr << "cd(" << *s << "): not implemented yet" << std::endl;
 }
 
 char* const* Program::vector2array() {
